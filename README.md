@@ -22,7 +22,7 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
 > Note: CDC in this example uses Kafka as a transport
 ### Prepare
 - Get Apache Ignite, CDC extention (ignite-cdc-ext) and configs
-- Save configs to /tmp/config (or adjust paths for \*-kafkaToIgnite.properties in configs)
+- Save repo configs to apache ignite config dir
 - Create Kafka topics (see [Quick Apache Kafka topic creation](#quick-apache-kafka-topic-creation))
 - Unpack ignite-cdc-ext-*-bin.zip
     - move ignite-cdc-ext/bin/\* to apache ignite bin dir
@@ -31,8 +31,8 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
 ### Start
 Run the following commands in Apache Ignite directory to start Ignite:
 ```
-$ bin/ignite.sh /tmp/config/cluster0_native-persistence-with-cdc_node0.xml
-$ bin/ignite.sh /tmp/config/cluster1_native-persistence-with-cdc_node0.xml
+$ bin/ignite.sh config/cluster0_native-persistence-with-cdc_node0.xml
+$ bin/ignite.sh config/cluster1_native-persistence-with-cdc_node0.xml
 ```
 
 Activate clusters:
@@ -50,14 +50,14 @@ $ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL
 ```
 Run CDC
 ```
-$ bin/ignite-cdc.sh /tmp/config/cluster0_native-persistence-with-cdc_node0.xml
-$ bin/ignite-cdc.sh /tmp/config/cluster1_native-persistence-with-cdc_node0.xml
+$ bin/ignite-cdc.sh config/cluster0_native-persistence-with-cdc_node0.xml
+$ bin/ignite-cdc.sh config/cluster1_native-persistence-with-cdc_node0.xml
 ```
 
 Run kafta-to-ignite
 ```
-$ bin/kafka-to-ignite.sh /tmp/config/cluster0_kafka-to-ignite_client.xml
-$ bin/kafka-to-ignite.sh /tmp/config/cluster1_kafka-to-ignite_client.xml
+$ bin/kafka-to-ignite.sh config/cluster0_kafka-to-ignite_client.xml
+$ bin/kafka-to-ignite.sh config/cluster1_kafka-to-ignite_client.xml
 ```
 
 ### Active-active replication

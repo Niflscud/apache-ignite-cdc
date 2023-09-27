@@ -61,5 +61,5 @@
         <property name="kafkaRequestTimeout" value="30000"/>
     </bean>
 
-    <util:properties id="kafkaProperties" location="file:/tmp/config/cluster1_kafka-for-kafkaToIgnite.properties"/>
+    <util:properties id="kafkaProperties" location="file:config/cluster1_kafka-for-kafkaToIgnite.properties"/>
 </beans>
