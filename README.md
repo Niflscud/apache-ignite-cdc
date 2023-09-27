@@ -4,7 +4,11 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
 # Contents
 1. [Binary distribs](#binary-distribs)
 2. [How to setup clusters](#how-to-setup-clusters)
+   1. [Prepare](#prepare)
+   2. [Start](#start)
+   3. [Active-active replication](#active-active-replication)
 3. [Quick Apache Kafka topic creation](#quick-apache-kafka-topic-creation)
+   
 
 ## Binary distribs
 [ignite-cdc-ext-2.15.0-bin.zip](http://niflscud.red/static/distrib/ignite-cdc-ext-2.15.0-bin.zip) \
@@ -24,13 +28,13 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
     - move contents of ignite-cdc-ext/libs/\* to apache ignite libs dir
 
 ### Start
-- Run the following commands in Apache Ignite directory to start Ignite:
+Run the following commands in Apache Ignite directory to start Ignite:
 ```
 $ bin/ignite.sh /tmp/config/cluster0_native-persistence-with-cdc_node0.xml
 $ bin/ignite.sh /tmp/config/cluster1_native-persistence-with-cdc_node0.xml
 ```
 
-- Activate clusters:
+Activate clusters:
 ```
 $ bin/control.sh --user ignite --password ignite --port 11211 --baseline      # get sure (all) instance(s) started
 $ bin/control.sh --user ignite --password ignite --port 11211 --set-state active --yes
@@ -38,21 +42,69 @@ $ bin/control.sh --user ignite --password ignite --port 11212 --baseline      # 
 $ bin/control.sh --user ignite --password ignite --port 11212 --set-state active --yes
 ```
 
-- Create tables on both clusters in order to get ability to run SELECT on replica (CDC with SQL)
+Create tables on both clusters in order to get ability to run SELECT on replica (CDC with SQL)
 ```
-$ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL, PAYLOAD VARCHAR, PRIMARY KEY(ID)) WITH "CACHE_NAME=CDC_CACHE,KEY_TYPE=SOME_KEY_TYPE,VALUE_TYPE=SOME_VAL_TYPE";' | bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10800
-$ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL, PAYLOAD VARCHAR, PRIMARY KEY(ID)) WITH "CACHE_NAME=CDC_CACHE,KEY_TYPE=SOME_KEY_TYPE,VALUE_TYPE=SOME_VAL_TYPE";' | bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10801
+$ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL, PAYLOAD VARCHAR, PRIMARY KEY(ID)) WITH "CACHE_NAME=CDC_CACHE,KEY_TYPE=SOME_KEY_TYPE,VALUE_TYPE=SOME_VAL_TYPE";' | bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10800 2> /dev/null
+$ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL, PAYLOAD VARCHAR, PRIMARY KEY(ID)) WITH "CACHE_NAME=CDC_CACHE,KEY_TYPE=SOME_KEY_TYPE,VALUE_TYPE=SOME_VAL_TYPE";' | bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10801 2> /dev/null
 ```
-- Run CDC
+Run CDC
 ```
 $ bin/ignite-cdc.sh /tmp/config/cluster0_native-persistence-with-cdc_node0.xml
 $ bin/ignite-cdc.sh /tmp/config/cluster1_native-persistence-with-cdc_node0.xml
 ```
 
-- Run kafta-to-ignite
+Run kafta-to-ignite
 ```
 $ bin/kafka-to-ignite.sh /tmp/config/cluster0_kafka-to-ignite_client.xml
 $ bin/kafka-to-ignite.sh /tmp/config/cluster1_kafka-to-ignite_client.xml
+```
+
+### Active-active replication
+> Note: TVAL should monotonously increase for active-active replication ([conflictResolveField](https://ignite.apache.org/docs/latest/extensions-and-integrations/change-data-capture-extensions#cacheversionconflictresolver-implementation))
+
+Insert test data into the first database:
+```
+$ bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10800
+0: jdbc:ignite:thin://127.0.0.1:10800> INSERT INTO CDC_CACHE VALUES (0,0,'a'),(1,1,'b'),(2,2,'c'),(3,3,NULL),(4,4,'aa'),(5,5,'bb'),(6,6,'cc'),(7,7,NULL),(8,8,NULL),(9,9,NULL);
+```
+Insert test data into the second database:
+```
+$ bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10801
+0: jdbc:ignite:thin://127.0.0.1:10801> INSERT INTO CDC_CACHE VALUES (10,10,'a'),(11,11,'b'),(12,12,'c'),(13,13,NULL),(14,14,'aa'),(15,15,'bb'),(16,16,'cc'),(17,17,NULL),(18,18,NULL),(19,19,NULL);
+```
+Wait approx. 1-2 minutes, and then:
+```
+$ bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10800
+0: jdbc:ignite:thin://127.0.0.1:10800> SELECT * FROM CDC_CACHE ORDER BY ID;
+$ bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10801
+0: jdbc:ignite:thin://127.0.0.1:10801> SELECT * FROM CDC_CACHE ORDER BY ID;
+```
+Both SELECT should return equal data:
+```
++----+------+---------+
+| ID | TVAL | PAYLOAD |
++----+------+---------+
+| 0  | 0    | a       |
+| 1  | 1    | b       |
+| 2  | 2    | c       |
+| 3  | 3    |         |
+| 4  | 4    | aa      |
+| 5  | 5    | bb      |
+| 6  | 6    | cc      |
+| 7  | 7    |         |
+| 8  | 8    |         |
+| 9  | 9    |         |
+| 10 | 10   | a       |
+| 11 | 11   | b       |
+| 12 | 12   | c       |
+| 13 | 13   |         |
+| 14 | 14   | aa      |
+| 15 | 15   | bb      |
+| 16 | 16   | cc      |
+| 17 | 17   |         |
+| 18 | 18   |         |
+| 19 | 19   |         |
++----+------+---------+
 ```
 
 ## Quick Apache Kafka topic creation
