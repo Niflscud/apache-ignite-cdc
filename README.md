@@ -25,8 +25,8 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
 - Save configs to /tmp/config (or adjust paths for \*-kafkaToIgnite.properties in configs)
 - Create Kafka topics (see [Quick Apache Kafka topic creation](#quick-apache-kafka-topic-creation))
 - Unpack ignite-cdc-ext-*-bin.zip
-    - move contents of ignite-cdc-ext/bin/\* to apache ignite bin dir
-    - move contents of ignite-cdc-ext/libs/\* to apache ignite libs dir
+    - move ignite-cdc-ext/bin/\* to apache ignite bin dir
+    - move ignite-cdc-ext/libs/\* to apache ignite libs dir
 
 ### Start
 Run the following commands in Apache Ignite directory to start Ignite:
