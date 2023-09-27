@@ -29,7 +29,7 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
     - move ignite-cdc-ext/libs/\* to apache ignite libs dir
 
 ### Start
-Run the following commands in Apache Ignite directory to start Ignite:
+Run the following commands in Apache Ignite directory:
 ```
 $ bin/ignite.sh config/cluster0_native-persistence-with-cdc_node0.xml
 $ bin/ignite.sh config/cluster1_native-persistence-with-cdc_node0.xml
