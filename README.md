@@ -23,16 +23,21 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
 ### Prepare
 - Get Apache Ignite, CDC extention (ignite-cdc-ext) and configs
 - Save repo configs to apache ignite config dir
-- Create Kafka topics (see [Quick Apache Kafka topic creation](#quick-apache-kafka-topic-creation))
+- Create Kafka topics (see [Quick Apache Kafka topic creation](#quick-apache-kafka-topic-creation)) (only if you use Kafka)
 - Unpack ignite-cdc-ext-*-bin.zip
     - move ignite-cdc-ext/bin/\* to apache ignite bin dir
     - move ignite-cdc-ext/libs/\* to apache ignite libs dir
 
 ### Start
-Run the following commands in Apache Ignite directory:
+Run the following commands in Apache Ignite directory in case of IgniteToKafka/KafkaToIgnite replication:
 ```
 $ bin/ignite.sh config/cluster0_native-persistence-with-cdc_node0.xml
 $ bin/ignite.sh config/cluster1_native-persistence-with-cdc_node0.xml
+```
+Run the following commands in Apache Ignite directory in case of IgniteToIgnite replication:
+```
+$ bin/ignite.sh config/ignite-to-ignite/cluster0_native-persistence-with-cdc_node0.xml
+$ bin/ignite.sh config/ignite-to-ignite/cluster1_native-persistence-with-cdc_node0.xml
 ```
 
 Activate clusters:
@@ -48,13 +53,18 @@ Create tables on both clusters in order to get ability to run SELECT on replica 
 $ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL, PAYLOAD VARCHAR, PRIMARY KEY(ID)) WITH "CACHE_NAME=CDC_CACHE,KEY_TYPE=SOME_KEY_TYPE,VALUE_TYPE=SOME_VAL_TYPE";' | bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10800 2> /dev/null
 $ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL, PAYLOAD VARCHAR, PRIMARY KEY(ID)) WITH "CACHE_NAME=CDC_CACHE,KEY_TYPE=SOME_KEY_TYPE,VALUE_TYPE=SOME_VAL_TYPE";' | bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10801 2> /dev/null
 ```
-Run CDC
+Run CDC (IgniteToKafka/KafkaToIgnite replication)
 ```
 $ bin/ignite-cdc.sh config/cluster0_native-persistence-with-cdc_node0.xml
 $ bin/ignite-cdc.sh config/cluster1_native-persistence-with-cdc_node0.xml
 ```
+Run CDC (IgniteToIgnite replication)
+```
+$ bin/ignite-cdc.sh config/ignite-to-ignite/cluster0_native-persistence-with-cdc_node0.xml
+$ bin/ignite-cdc.sh config/ignite-to-ignite/cluster1_native-persistence-with-cdc_node0.xml
+```
 
-Run kafta-to-ignite
+Run kafta-to-ignite (only in case of IgniteToKafka/KafkaToIgnite replication)
 ```
 $ bin/kafka-to-ignite.sh config/cluster0_kafka-to-ignite_client.xml
 $ bin/kafka-to-ignite.sh config/cluster1_kafka-to-ignite_client.xml
