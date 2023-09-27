@@ -26,8 +26,8 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
 ### Start
 - Run the following commands in Apache Ignite directory to start Ignite:
 ```
-$ bin/ignite.sh /tmp/config/cluster0_native-persistance-with-cdc_node0.xml
-$ bin/ignite.sh /tmp/config/cluster1_native-persistance-with-cdc_node0.xml
+$ bin/ignite.sh /tmp/config/cluster0_native-persistence-with-cdc_node0.xml
+$ bin/ignite.sh /tmp/config/cluster1_native-persistence-with-cdc_node0.xml
 ```
 
 - Activate clusters:
@@ -45,8 +45,8 @@ $ echo 'CREATE TABLE IF NOT EXISTS CDC_CACHE (ID INT NOT NULL, TVAL INT NOT NULL
 ```
 - Run CDC
 ```
-$ bin/ignite-cdc.sh /tmp/config/cluster0_native-persistance-with-cdc_node0.xml
-$ bin/ignite-cdc.sh /tmp/config/cluster1_native-persistance-with-cdc_node0.xml
+$ bin/ignite-cdc.sh /tmp/config/cluster0_native-persistence-with-cdc_node0.xml
+$ bin/ignite-cdc.sh /tmp/config/cluster1_native-persistence-with-cdc_node0.xml
 ```
 
 - Run kafta-to-ignite
