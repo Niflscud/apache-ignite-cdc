@@ -7,6 +7,7 @@ Some stuff for Apache Ignite CDC (configs, libs, etc)
    1. [Prepare](#prepare)
    2. [Start](#start)
    3. [Active-active replication](#active-active-replication)
+   4. [Load testing](#load-testing)
 3. [Quick Apache Kafka topic creation](#quick-apache-kafka-topic-creation)
    
 
@@ -105,6 +106,20 @@ Both SELECT should return equal data:
 | 18 | 18   |         |
 | 19 | 19   |         |
 +----+------+---------+
+```
+### Load testing
+You can generate some data using bin/simple-dataset-generator.sh
+```
+$ path/to/repo/bin/simple-dataset-generator.sh -f some-dataset.sql -s 20 -e 1000000   # generate inserts with ids from 20 to 1'000'000 and save output in some-dataset.sql file
+$ bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10801 -f some-dataset.sql
+```
+Adjust simple-dataset-generator.sh for your needs
+
+Get the data on another cluster:
+```
+$ bin/sqlline.sh -n ignite -p ignite -u jdbc:ignite:thin://127.0.0.1:10800
+0: jdbc:ignite:thin://127.0.0.1:10800> SELECT COUNT(*) FROM CDC_CACHE;
+0: jdbc:ignite:thin://127.0.0.1:10800> SELECT * FROM CDC_CACHE ORDER BY ID;
 ```
 
 ## Quick Apache Kafka topic creation
